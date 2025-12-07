@@ -1,0 +1,89 @@
+<header class="sticky top-0 z-20 header-shadow bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+
+        <!-- Header Left: hamburger (mobile) + title -->
+        <div class="flex items-center gap-4">
+          <!-- Mobile: open sidebar -->
+          <button id="openSidebarBtn" class="md:hidden p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700" aria-label="Open sidebar">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+
+          <div>
+            <h1 id="pageTitle" class="text-lg font-semibold text-slate-900 dark:text-slate-100">Dashboard</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-300">Welcome back, Admin</p>
+          </div>
+        </div>
+
+        <!-- Header Right: search, notifications, theme, profile -->
+        <div class="flex items-center gap-3">
+
+          <!-- Search (hidden on xs, full on md+) -->
+          <div class="hidden md:block">
+            <label for="search" class="sr-only">Search</label>
+            <div class="relative">
+              <input id="search" class="w-64 rounded-md border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]" placeholder="Search patients, tests, doctors..." />
+              <div class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">🔎</div>
+            </div>
+          </div>
+
+          <!-- Notification dropdown -->
+          <div class="relative">
+            <button id="notifBtn" class="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700" aria-expanded="false" aria-controls="notifDropdown">
+              <span class="sr-only">View notifications</span>
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+
+            <!-- notif dropdown -->
+            <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-black/5">
+              <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700 font-medium">Notifications</div>
+              <ul class="max-h-56 overflow-y-auto">
+                <li class="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+                  <div class="text-sm font-medium">New lab result</div>
+                  <div class="text-xs text-slate-500 dark:text-slate-400">Patient: John Doe • 10 min ago</div>
+                </li>
+                <li class="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+                  <div class="text-sm font-medium">Appointment reminder</div>
+                  <div class="text-xs text-slate-500 dark:text-slate-400">Patient: Mary • Tomorrow 10:00</div>
+                </li>
+                <li class="px-4 py-3 text-center text-sm text-slate-500">No more notifications</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Theme toggle (saves to localStorage) -->
+          <div>
+            <button id="themeToggle" class="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700" aria-pressed="false" title="Toggle theme">
+              <svg id="themeIcon" class="w-6 h-6" viewBox="0 0 24 24" fill="none">
+                <!-- default icon (sun) replaced by JS according to theme -->
+                <path d="M12 3v2M12 19v2M5.22 5.22l1.42 1.42M17.36 17.36l1.42 1.42M3 12h2M19 12h2M5.22 18.78l1.42-1.42M17.36 6.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Profile dropdown -->
+          <div class="relative">
+            <button id="profileBtn" class="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700" aria-expanded="false" aria-controls="profileDropdown">
+              <img src="https://ui-avatars.com/api/?name=Admin&background=7c3aed&color=fff&size=32" alt="Admin" class="w-8 h-8 rounded-full" />
+              <span class="hidden sm:inline text-sm">Admin</span>
+            </button>
+
+            <!-- profile dropdown -->
+            <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-black/5">
+              <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.28 0 4-1.72 4-4s-1.72-4-4-4-4 1.72-4 4 1.72 4 4 4zM6 20v-1a4 4 0 014-4h4a4 4 0 014 4v1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Profile
+              </a>
+              <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Activity
+              </a>
+              <div class="border-t border-slate-100 dark:border-slate-700"></div>
+              <button id="logoutBtn" class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm">Logout</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </header>
