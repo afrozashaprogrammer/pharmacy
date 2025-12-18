@@ -13,138 +13,10 @@
     </button>
   </div>
 
-  <!-- TEST TABLE -->
-  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
-    <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-      <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100">Test List</h2>
-
-      <form method="GET" class="flex items-center gap-2">
-        <input 
-          type="text" 
-          name="search"
-          value="{{ request.GET.search }}"
-          placeholder="Search test name or code"
-          class="px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg
-                 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/60"
-        >
-        <button 
-          type="submit"
-          class="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm">
-          Search
-        </button>
-      </form>
-    </div>
-
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left text-slate-700 dark:text-slate-300">
-        <thead class="text-xs uppercase bg-slate-100 dark:bg-slate-700 dark:text-slate-200">
-          <tr>
-            <th class="px-6 py-3">Name</th>
-            <th class="px-6 py-3">Code</th>
-            <th class="px-6 py-3">Price</th>
-            <th class="px-6 py-3">Discount</th>
-            <th class="px-6 py-3">Sample</th>
-            <th class="px-6 py-3">Fasting</th>
-            <th class="px-6 py-3">Processing</th>
-            <th class="px-6 py-3">Unit</th>
-            <th class="px-6 py-3">Has Range</th>
-            <th class="px-6 py-3">Report</th>
-            <th class="px-6 py-3">Reference</th>
-            <th class="px-6 py-3">Gender</th>
-            <th class="px-6 py-3">Active</th>
-            <th class="px-6 py-3 text-right">Actions</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% for test in tests %}
-          <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-            <td class="px-6 py-3">{{ test.name }}</td>
-            <td class="px-6 py-3">{{ test.code }}</td>
-            <td class="px-6 py-3">৳ {{ test.price }}</td>
-            <td class="px-6 py-3">
-              {% if test.discount_type %}
-                {{ test.discount_value }} {{ test.discount_type }}
-              {% else %}
-                -
-              {% endif %}
-            </td>
-            <td class="px-6 py-3">{{ test.sample_type|default:"-" }}</td>
-            <td class="px-6 py-3">{% if test.fasting_required %}Yes{% else %}No{% endif %}</td>
-            <td class="px-6 py-3">{{ test.processing_time_hours }} hrs</td>
-            <td class="px-6 py-3">{{ test.unit|default:"-" }}</td>
-            <td class="px-6 py-3">{{ test.has_range|default:"-" }}</td>
-            <td class="px-6 py-3">{{ test.report_format|default:"PDF" }}</td>
-            <td class="px-6 py-3">{{ test.reference_range|default:"-" }}</td>
-            <td class="px-6 py-3">{{ test.gender_specific }}</td>
-            <td class="px-6 py-3">
-              {% if test.is_active %}
-              <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">Active</span>
-              {% else %}
-              <span class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded">Inactive</span>
-              {% endif %}
-            </td>
-
-            <td class="px-6 py-3 text-right space-x-3">
-              <button class="edit-test-btn text-blue-600 hover:underline"
-                data-id="{{ test.id }}"
-                data-name="{{ test.name }}"
-                data-code="{{ test.code }}"
-                data-price="{{ test.price }}"
-                data-discount_type="{{ test.discount_type }}"
-                data-discount_value="{{ test.discount_value }}"
-                data-sample="{{ test.sample_type }}"
-                data-fasting="{{ test.fasting_required }}"
-                data-processing="{{ test.processing_time_hours }}"
-                data-unit="{{ test.unit }}"
-                data-has_range="{{ test.has_range }}"
-                data-report="{{ test.report_format }}"
-                data-reference="{{ test.reference_range }}"
-                data-gender="{{ test.gender_specific }}"
-                data-description="{{ test.description }}"
-                data-instructions="{{ test.instructions }}">
-                Edit
-              </button>
-
-              <form method="POST" class="inline">
-                {% csrf_token %}
-                <input type="hidden" name="delete" value="{{ test.id }}">
-                <button type="submit" class="text-red-600 hover:underline"
-                  onclick="return confirm('Delete {{ test.name }}?');">
-                  Delete
-                </button>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-
-      </table>
-    </div>
+  <!-- TEST TABLE CONTAINER -->
+  <div id="testTableParentContainer">
+    {% include 'administration/htmx/test_table.html' %}
   </div>
-
-  <!-- PAGINATION -->
-  {% if tests.has_other_pages %}
-  <div class="flex justify-center mt-4">
-    <div class="flex space-x-1">
-      {% if tests.has_previous %}
-      <a href="?page={{ tests.previous_page_number }}" class="px-3 py-1 bg-slate-200 rounded">Prev</a>
-      {% endif %}
-
-      {% for i in tests.paginator.page_range %}
-        {% if tests.number == i %}
-        <span class="px-3 py-1 bg-primary text-white rounded">{{ i }}</span>
-        {% else %}
-        <a href="?page={{ i }}" class="px-3 py-1 bg-slate-200 rounded">{{ i }}</a>
-        {% endif %}
-      {% endfor %}
-
-      {% if tests.has_next %}
-      <a href="?page={{ tests.next_page_number }}" class="px-3 py-1 bg-slate-200 rounded">Next</a>
-      {% endif %}
-    </div>
-  </div>
-  {% endif %}
 
   <!-- BACKDROP -->
   <div id="testBackdrop" class="fixed inset-0 bg-black bg-opacity-40 hidden z-40"></div>
@@ -320,7 +192,7 @@
   </div>
 </div>
 
-
+<!-- HTMX + Offcanvas Script -->
 <script>
 const offcanvas = document.getElementById("testOffcanvas");
 const backdrop = document.getElementById("testBackdrop");
@@ -347,31 +219,32 @@ closeBtn.addEventListener("click", closeCanvas);
 backdrop.addEventListener("click", closeCanvas);
 
 // Edit Button Handler
-document.querySelectorAll(".edit-test-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    title.textContent = "Edit Test";
+document.body.addEventListener("click", function(e) {
+  const btn = e.target.closest(".edit-test-btn");
+  if (!btn) return;
 
-    form.name.value = btn.dataset.name;
-    form.code.value = btn.dataset.code;
-    form.price.value = btn.dataset.price;
-    form.discount_type.value = btn.dataset.discount_type;
-    form.discount_value.value = btn.dataset.discount_value;
-    form.sample_type.value = btn.dataset.sample;
-    form.fasting_required.checked = btn.dataset.fasting === "True";
-    form.processing_time_hours.value = btn.dataset.processing;
-    form.unit.value = btn.dataset.unit;
-    form.has_range.value = btn.dataset.has_range;
-    form.report_format.value = btn.dataset.report;
-    form.reference_range.value = btn.dataset.reference;
-    form.gender_specific.value = btn.dataset.gender;
-    form.description.value = btn.dataset.description;
-    form.instructions.value = btn.dataset.instructions;
+  title.textContent = "Edit Test";
 
-    form.action = "{% url 'administration:update_test' 0 %}".replace("0", btn.dataset.id);
+  form.name.value = btn.dataset.name;
+  form.code.value = btn.dataset.code;
+  form.price.value = btn.dataset.price;
+  form.discount_type.value = btn.dataset.discount_type;
+  form.discount_value.value = btn.dataset.discount_value;
+  form.sample_type.value = btn.dataset.sample;
+  form.fasting_required.checked = btn.dataset.fasting === "True";
+  form.processing_time_hours.value = btn.dataset.processing;
+  form.unit.value = btn.dataset.unit;
+  form.has_range.value = btn.dataset.has_range;
+  form.report_format.value = btn.dataset.report;
+  form.reference_range.value = btn.dataset.reference;
+  form.gender_specific.value = btn.dataset.gender;
+  form.description.value = btn.dataset.description;
+  form.instructions.value = btn.dataset.instructions;
 
-    offcanvas.classList.remove("translate-x-full");
-    backdrop.classList.remove("hidden");
-  });
+  form.action = "{% url 'administration:update_test' 0 %}".replace("0", btn.dataset.id);
+
+  offcanvas.classList.remove("translate-x-full");
+  backdrop.classList.remove("hidden");
 });
 </script>
 

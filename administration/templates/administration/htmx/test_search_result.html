@@ -1,0 +1,80 @@
+<table class="w-full text-sm text-left text-slate-700 dark:text-slate-300">
+  <thead class="text-xs uppercase bg-slate-100 dark:bg-slate-700 dark:text-slate-200">
+    <tr>
+      <th class="px-6 py-3">Name</th>
+      <th class="px-6 py-3">Code</th>
+      <th class="px-6 py-3">Price</th>
+      <th class="px-6 py-3">Discount</th>
+      <th class="px-6 py-3">Sample</th>
+      <th class="px-6 py-3">Fasting</th>
+      <th class="px-6 py-3">Processing</th>
+      <th class="px-6 py-3">Unit</th>
+      <th class="px-6 py-3">Has Range</th>
+      <th class="px-6 py-3">Report</th>
+      <th class="px-6 py-3">Reference</th>
+      <th class="px-6 py-3">Gender</th>
+      <th class="px-6 py-3">Active</th>
+      <th class="px-6 py-3 text-right">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for test in tests %}
+    <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+      <td class="px-6 py-3">{{ test.name }}</td>
+      <td class="px-6 py-3">{{ test.code }}</td>
+      <td class="px-6 py-3">৳ {{ test.price }}</td>
+      <td class="px-6 py-3">{% if test.discount_type %}{{ test.discount_value }} {{ test.discount_type }}{% else %}-{% endif %}</td>
+      <td class="px-6 py-3">{{ test.sample_type|default:"-" }}</td>
+      <td class="px-6 py-3">{% if test.fasting_required %}Yes{% else %}No{% endif %}</td>
+      <td class="px-6 py-3">{{ test.processing_time_hours }} hrs</td>
+      <td class="px-6 py-3">{{ test.unit|default:"-" }}</td>
+      <td class="px-6 py-3">{{ test.has_range|default:"-" }}</td>
+      <td class="px-6 py-3">{{ test.report_format|default:"PDF" }}</td>
+      <td class="px-6 py-3">{{ test.reference_range|default:"-" }}</td>
+      <td class="px-6 py-3">{{ test.gender_specific }}</td>
+      <td class="px-6 py-3">
+        {% if test.is_active %}
+          <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">Active</span>
+        {% else %}
+          <span class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded">Inactive</span>
+        {% endif %}
+      </td>
+      <td class="px-6 py-3 text-right space-x-3">
+        <button class="edit-test-btn text-blue-600 hover:underline"
+          data-id="{{ test.id }}"
+          data-name="{{ test.name }}"
+          data-code="{{ test.code }}"
+          data-price="{{ test.price }}"
+          data-discount_type="{{ test.discount_type }}"
+          data-discount_value="{{ test.discount_value }}"
+          data-sample="{{ test.sample_type }}"
+          data-fasting="{{ test.fasting_required }}"
+          data-processing="{{ test.processing_time_hours }}"
+          data-unit="{{ test.unit }}"
+          data-has_range="{{ test.has_range }}"
+          data-report="{{ test.report_format }}"
+          data-reference="{{ test.reference_range }}"
+          data-gender="{{ test.gender_specific }}"
+          data-description="{{ test.description }}"
+          data-instructions="{{ test.instructions }}">
+          Edit
+        </button>
+
+        <form method="POST" class="inline">
+          {% csrf_token %}
+          <input type="hidden" name="delete" value="{{ test.id }}">
+          <button type="submit" class="text-red-600 hover:underline"
+            onclick="return confirm('Delete {{ test.name }}?');">
+            Delete
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="14" class="px-6 py-3 text-center text-slate-500">No tests found.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

@@ -1,264 +1,177 @@
 {% extends 'administration/base.html' %}
 {% block content %}
 <main class="p-6 space-y-6">
-
-  <!-- PAGE HEADER -->
-  <div class="flex items-center justify-between">
-    <h1 class="text-2xl font-semibold text-slate-800 dark:text-slate-100">{{role}}</h1>
-    <button id="openUserOffcanvas"
-      class="px-4 py-2 text-white bg-primary rounded-lg shadow hover:bg-primary/90">
-      + New {{role}}
-    </button>
-  </div>
-
-  <!-- USER TABLE -->
-  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
-    <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-      <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100">{{role}} List</h2>
-
-      <form method="GET" class="flex items-center gap-2">
-        <input 
-          type="text" 
-          name="username"
-          value="{{ request.GET.username }}"
-          placeholder="Search name or phone"
-          class="px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg
-                bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/60"
-        >
-        <button 
-          type="submit"
-          class="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 text-sm">
-          Search
+    <!-- PAGE HEADER -->
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-semibold text-slate-800 dark:text-slate-100">{{ role|capfirst }}</h1>
+        <button id="openUserOffcanvas" class="px-4 py-2 text-white bg-primary rounded-lg shadow hover:bg-primary/90">
+            + New {{ role|capfirst }}
         </button>
-      </form>
     </div>
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left text-slate-700 dark:text-slate-300">
-        <thead class="text-xs uppercase bg-slate-100 dark:bg-slate-700 dark:text-slate-200">
-          <tr>
-            <th class="px-6 py-3">Name</th>
-            <th class="px-6 py-3">Phone Number</th>
-            <th class="px-6 py-3">Address</th>
-            <th class="px-6 py-3">Gender</th>
-            <th class="px-6 py-3">Role</th>
-            <th class="px-6 py-3">Created At</th>
-            <th class="px-6 py-3 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for u in users %}
-          <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-            <td class="px-6 py-3 font-medium text-slate-800 dark:text-slate-100">{{ u.username }}</td>
-            <td class="px-6 py-3">{{ u.profile.phone_number }}</td>
-            <td class="px-6 py-3">{{ u.profile.address }}</td>
-            <td class="px-6 py-3">{{ u.profile.gender }}</td>
-            <td class="px-6 py-3">{{ u.profile.role }}</td>
-            <td class="px-6 py-3">{{ u.profile.created_at }}</td>
-            <td class="px-6 py-3 text-right space-x-2">
-              <button class="edit-user-btn text-blue-600 hover:underline"
-                      data-id="{{ u.id }}"
-                      data-username="{{ u.username }}"
-                      data-phone="{{ u.profile.phone_number }}"
-                      data-address="{{ u.profile.address }}"
-                      data-gender="{{ u.profile.gender }}"
-                      data-role="{{ u.profile.role }}">
-                Edit
-              </button>
-              <form method="POST" class="inline">
-                  {% csrf_token %}
-                  <input type="hidden" name="delete" value="{{ u.id }}">
-                  <button type="submit" class="text-red-600 hover:underline"
-                      onclick="return confirm('Are you sure you want to delete {{ u.username }}?');">
-                      Delete
-                  </button>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+
+    <!-- USERS TABLE -->
+    <div id="userTableParentContainer">
+        {% include 'administration/htmx/user_table.html' %}
     </div>
-  </div>
-  {% if users.has_other_pages %}
-  <div class="flex justify-between items-center mt-4 px-4">
-    <div class="text-sm text-slate-600 dark:text-slate-400">
-      Showing {{ users.start_index }} to {{ users.end_index }} of {{ users.paginator.count }} {{role}}
+
+    <!-- NEW USER OFFCANVAS -->
+    <div id="userOffcanvas" class="fixed top-0 right-0 h-full w-80 bg-white dark:bg-slate-800 shadow-xl transform translate-x-full transition-all duration-300 z-[9999]">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <h2 class="text-xl font-semibold">New {{ role|capfirst }}</h2>
+            <button id="closeUserOffcanvas" class="text-slate-500 hover:text-slate-800 dark:hover:text-slate-300">✕</button>
+        </div>
+        <form method="POST" action="{% url 'administration:new_user' %}">
+            {% csrf_token %}
+            <input type="hidden" name="list_role" value="{{ role }}">
+            <div class="p-4 space-y-4">
+                <div>
+                    <label class="text-sm">Username</label>
+                    <input type="text" name="username" placeholder="Enter username" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                </div>
+                <div>
+                    <label class="text-sm">First Name</label>
+                    <input type="text" name="first_name" placeholder="Enter first name" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                </div>
+                <div>
+                    <label class="text-sm">Last Name</label>
+                    <input type="text" name="last_name" placeholder="Enter last name" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                </div>
+                <div>
+                    <label class="text-sm">Phone Number</label>
+                    <input type="text" name="phone_number" placeholder="Enter phone number" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                </div>
+                <div>
+                    <label class="text-sm">Address</label>
+                    <input type="text" name="address" placeholder="Enter address" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                </div>
+                <div>
+                    <label class="text-sm">Gender</label>
+                    <select name="gender" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm">Role</label>
+                    <select name="role" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        {% if role == 'doctor' %}
+                            <option value="doctor">Doctor</option>
+                        {% elif role == 'patient' %}
+                            <option value="patient">Patient</option>
+                        {% else %}
+                            <option value="admin">Admin</option>
+                            <option value="counter">Counter</option>
+                            <option value="sample collection">Sample Collection</option>
+                            <option value="lab">Lab</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="cleaner">Cleaner</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <button class="w-full py-2 bg-primary text-white rounded-lg hover:bg-primary/90">Create {{ role }}</button>
+            </div>
+        </form>
     </div>
-    <div class="flex space-x-1">
-      {% if users.has_previous %}
-        <a href="?{% if request.GET.username %}username={{ request.GET.username }}&{% endif %}page={{ users.previous_page_number }}"
-          class="px-3 py-1 rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 hover:bg-primary hover:text-white">
-          Previous
-        </a>
-      {% else %}
-        <span class="px-3 py-1 rounded-lg border bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed">Previous</span>
-      {% endif %}
 
-      {% for num in users.paginator.page_range %}
-        {% if users.number == num %}
-          <span class="px-3 py-1 rounded-lg border bg-primary text-white">{{ num }}</span>
-        {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
-          <a href="?{% if request.GET.username %}username={{ request.GET.username }}&{% endif %}page={{ num }}"
-            class="px-3 py-1 rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 hover:bg-primary hover:text-white">
-            {{ num }}
-          </a>
-        {% endif %}
-      {% endfor %}
-
-      {% if users.has_next %}
-        <a href="?{% if request.GET.username %}username={{ request.GET.username }}&{% endif %}page={{ users.next_page_number }}"
-          class="px-3 py-1 rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 hover:bg-primary hover:text-white">
-          Next
-        </a>
-      {% else %}
-        <span class="px-3 py-1 rounded-lg border bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed">Next</span>
-      {% endif %}
+    <!-- EDIT USER OFFCANVAS -->
+    <div id="editUserOffcanvas" class="fixed top-0 right-0 h-full w-80 bg-white dark:bg-slate-800 shadow-xl transform translate-x-full transition-all duration-300 z-[9999]">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <h2 class="text-xl font-semibold">Edit {{ role|capfirst }}</h2>
+            <button id="closeEditUserOffcanvas" class="text-slate-500 hover:text-slate-800 dark:hover:text-slate-300">✕</button>
+        </div>
+        <form method="POST" id="editUserForm">
+            {% csrf_token %}
+            <input type="hidden" name="list_role" value="{{ role }}">
+            <div class="p-4 space-y-4">
+                <div>
+                    <label class="text-sm">Username</label>
+                    <input type="text" id="edit_username" name="username" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                </div>
+                <div>
+                    <label class="text-sm">First Name</label>
+                    <input type="text" id="edit_first_name" name="first_name" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                </div>
+                <div>
+                    <label class="text-sm">Last Name</label>
+                    <input type="text" id="edit_last_name" name="last_name" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                </div>
+                <div>
+                    <label class="text-sm">Phone Number</label>
+                    <input type="text" id="edit_phone_number" name="phone_number" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                </div>
+                <div>
+                    <label class="text-sm">Address</label>
+                    <input type="text" id="edit_address" name="address" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                </div>
+                <div>
+                    <label class="text-sm">Gender</label>
+                    <select id="edit_gender" name="gender" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm">Role</label>
+                    <select id="edit_role" name="role" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        {% if role == 'doctor' %}
+                            <option value="doctor">Doctor</option>
+                        {% elif role == 'patient' %}
+                            <option value="patient">Patient</option>
+                        {% else %}
+                            <option value="admin">Admin</option>
+                            <option value="counter">Counter</option>
+                            <option value="sample collection">Sample Collection</option>
+                            <option value="lab">Lab</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="cleaner">Cleaner</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <button class="w-full py-2 bg-primary text-white rounded-lg hover:bg-primary/90">Update {{ role }}</button>
+            </div>
+        </form>
     </div>
-  </div>
-  {% endif %}
 
+    <script>
+    (function () {
+        // NEW USER OFFCANVAS
+        document.body.addEventListener("click", function (e) {
+            const openBtn = e.target.closest("#openUserOffcanvas");
+            const closeBtn = e.target.closest("#closeUserOffcanvas");
+            const offcanvas = document.getElementById("userOffcanvas");
+            if (!offcanvas) return;
+            if (openBtn) offcanvas.classList.remove("translate-x-full");
+            if (closeBtn) offcanvas.classList.add("translate-x-full");
+        });
 
-  <!-- NEW USER OFFCANVAS -->
-  <div id="userOffcanvas"
-       class="fixed top-0 right-0 h-full w-80 bg-white dark:bg-slate-800 shadow-xl transform translate-x-full transition-all duration-300 z-[9999]">
-    <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-      <h2 class="text-xl font-semibold">New {{role}}</h2>
-      <button id="closeUserOffcanvas" class="text-slate-500 hover:text-slate-800 dark:hover:text-slate-300">✕</button>
-    </div>
-    <form method="POST" action="{% url 'administration:new_user' %}">
-      {% csrf_token %}
-      <div class="p-4 space-y-4">
-        <div>
-          <label class="text-sm">Name</label>
-          <input type="text" id="username" name="username" placeholder="Enter username"
-                 class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary/60">
-        </div>
-        <div>
-          <label class="text-sm">Phone Number</label>
-          <input type="text" id="phone_number" name="phone_number" placeholder="Enter phone number"
-                 class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary/60">
-        </div>
-        <div>
-          <label class="text-sm">Address</label>
-          <input type="text" id="address" name="address" placeholder="Enter address"
-                 class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary/60">
-        </div>
-        <div>
-          <label class="text-sm">Gender</label>
-          <select id="gender" name="gender" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-sm">Role</label>
-          <select id="role" name="role" class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
-            {% if role == 'doctor' %}
-            <option value="doctor">Doctor</option>
-            {% elif role == 'patient' %}
-            <option value="patient">Patient</option>
-            {% else %} 
+        // EDIT USER OFFCANVAS
+        document.body.addEventListener("click", function (e) {
+            const btn = e.target.closest(".edit-user-btn");
+            const closeBtn = e.target.closest("#closeEditUserOffcanvas");
+            const editOffcanvas = document.getElementById("editUserOffcanvas");
+            const editForm = document.getElementById("editUserForm");
+            if (!editOffcanvas || !editForm) return;
 
-            <option value="admin">Admin</option>
-            <option value="counter">Counter</option>
-            <option value="sample collection">Sample collection</option>
-            <option value="lab">Lab</option>
-            <option value="delivery">Delivery</option>
-            <option value="cleaner">Cleaner</option>
-            {% endif %}
+            if (btn) {
+                document.getElementById("edit_username").value = btn.dataset.username || "";
+                document.getElementById("edit_first_name").value = btn.dataset.firstName || "";
+                document.getElementById("edit_last_name").value = btn.dataset.lastName || "";
+                document.getElementById("edit_phone_number").value = btn.dataset.phone || "";
+                document.getElementById("edit_address").value = btn.dataset.address || "";
+                document.getElementById("edit_gender").value = btn.dataset.gender || "";
+                document.getElementById("edit_role").value = btn.dataset.role || "";
 
-          </select>
-        </div>
-        <button class="w-full py-2 bg-primary text-white rounded-lg hover:bg-primary/90">Create {{role}}</button>
-      </div>
-    </form>
-  </div>
+                editForm.action = `/administration/edit-user/${btn.dataset.id}/`;
+                editOffcanvas.classList.remove("translate-x-full");
+            }
 
-  <!-- EDIT USER OFFCANVAS -->
-  <div id="editUserOffcanvas"
-       class="fixed top-0 right-0 h-full w-80 bg-white dark:bg-slate-800 shadow-xl transform translate-x-full transition-all duration-300 z-[9999]">
-    <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-      <h2 class="text-xl font-semibold">Edit {{role}}</h2>
-      <button id="closeEditUserOffcanvas" class="text-slate-500 hover:text-slate-800 dark:hover:text-slate-300">✕</button>
-    </div>
-    <form method="POST" id="editUserForm">
-      {% csrf_token %}
-      <div class="p-4 space-y-4">
-        <div>
-          <label class="text-sm">Full Name</label>
-          <input type="text" id="edit_username" name="username"
-                 class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary/60">
-        </div>
-        <div>
-          <label class="text-sm">Phone Number</label>
-          <input type="text" id="edit_phone_number" name="phone_number"
-                 class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary/60">
-        </div>
-        <div>
-          <label class="text-sm">Address</label>
-          <input type="text" id="edit_address" name="address"
-                 class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary/60">
-        </div>
-        <div>
-          <label class="text-sm">Gender</label>
-          <select id="edit_gender" name="gender"
-                  class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-sm">Role</label>
-          <select id="edit_role" name="role"
-                  class="mt-1 px-3 py-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
-            {% if role == 'doctor' %}
-            <option value="doctor">Doctor</option>
-            {% elif role == 'patient' %}
-            <option value="patient">Patient</option>
-            {% else %} 
-            <option value="admin">Admin</option>
-            <option value="counter">Counter</option>
-            <option value="sample collection">Sample Collection</option>
-            <option value="lab">Lab</option>
-            <option value="delivery">Delivery</option>
-            <option value="cleaner">Cleaner</option>
-            {% endif %}
-          </select>
-        </div>
-        <button class="w-full py-2 bg-primary text-white rounded-lg hover:bg-primary/90">Update {{role}}</button>
-      </div>
-    </form>
-  </div>
-
+            if (closeBtn) editOffcanvas.classList.add("translate-x-full");
+        });
+    })();
+    </script>
 </main>
-
-<script>
-  // New User Offcanvas
-  const offcanvas = document.getElementById("userOffcanvas");
-  const openBtn = document.getElementById("openUserOffcanvas");
-  const closeBtn = document.getElementById("closeUserOffcanvas");
-  openBtn.addEventListener("click", () => offcanvas.classList.remove("translate-x-full"));
-  closeBtn.addEventListener("click", () => offcanvas.classList.add("translate-x-full"));
-
-  // Edit User Offcanvas
-  const edit_offcanvas = document.getElementById("editUserOffcanvas");
-  const edit_closeBtn = document.getElementById("closeEditUserOffcanvas");
-  const editForm = document.getElementById("editUserForm");
-
-  document.querySelectorAll('.edit-user-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.getElementById('edit_username').value = this.dataset.username;
-      document.getElementById('edit_phone_number').value = this.dataset.phone;
-      document.getElementById('edit_address').value = this.dataset.address;
-      document.getElementById('edit_gender').value = this.dataset.gender;
-      document.getElementById('edit_role').value = this.dataset.role;
-      editForm.action = `/administration/edit-user/${this.dataset.id}/`;
-      edit_offcanvas.classList.remove('translate-x-full');
-    });
-  });
-  edit_closeBtn.addEventListener("click", () => edit_offcanvas.classList.add("translate-x-full"));
-</script>
 {% endblock %}
+

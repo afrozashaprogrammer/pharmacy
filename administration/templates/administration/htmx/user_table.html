@@ -1,0 +1,61 @@
+<!-- USER TABLE -->
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
+    <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100">{{role|capfirst}} List</h2>
+        <form method="GET" class="flex items-center gap-2">
+            <input type="text" name="username" value="{{ request.GET.username }}" hx-get="?role={{request.GET.role}}&type=search" hx-trigger="input delay:300ms" hx-target="#userSearch" placeholder="Search name or phone"
+                class="px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg
+                bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/60">
+        </form>
+    </div>
+    <div class="overflow-x-auto" id="userSearch">
+        {% include 'administration/htmx/user_search_result.html' %}
+    </div>
+</div>
+
+{% if users.has_other_pages %}
+<div class="flex justify-between items-center mt-4 px-4">
+    <!-- Showing X to Y of Z Users -->
+    <div class="text-sm text-slate-600 dark:text-slate-400">
+        Showing {{ users.start_index }} to {{ users.end_index }} of {{ users.paginator.count }} {{ role }}
+    </div>
+
+    <!-- Pagination Buttons -->
+    <div class="flex space-x-1">
+        {% if users.has_previous %}
+            <a 
+                hx-get="?type=pagination&role={{ request.GET.role }}&{% if request.GET.username %}username={{ request.GET.username }}&{% endif %}page={{ users.previous_page_number }}"
+                hx-target="#userTableParentContainer"
+                class="px-3 py-1 rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 hover:bg-primary hover:text-white">
+                Previous
+            </a>
+        {% else %}
+            <span class="px-3 py-1 rounded-lg border bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed">Previous</span>
+        {% endif %}
+
+        {% for num in users.paginator.page_range %}
+            {% if users.number == num %}
+                <span class="px-3 py-1 rounded-lg border bg-primary text-white">{{ num }}</span>
+            {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
+                <a 
+                    hx-get="?type=pagination&role={{ request.GET.role }}&{% if request.GET.username %}username={{ request.GET.username }}&{% endif %}page={{ num }}"
+                    hx-target="#userTableParentContainer"
+                    class="px-3 py-1 rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 hover:bg-primary hover:text-white">
+                    {{ num }}
+                </a>
+            {% endif %}
+        {% endfor %}
+
+        {% if users.has_next %}
+            <a 
+                hx-get="?type=pagination&role={{ request.GET.role }}&{% if request.GET.username %}username={{ request.GET.username }}&{% endif %}page={{ users.next_page_number }}"
+                hx-target="#userTableParentContainer"
+                class="px-3 py-1 rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 hover:bg-primary hover:text-white">
+                Next
+            </a>
+        {% else %}
+            <span class="px-3 py-1 rounded-lg border bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed">Next</span>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

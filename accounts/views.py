@@ -1,26 +1,28 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as signin
-
+from django.contrib import messages
 # Create your views here.
-def home (request):
-    return render (request, 'accounts/home.html')
+def home(request):
+    return render(request, 'accounts/home.html')
 def login(request):
-    message = None
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        
-        if username and password:
-            user = authenticate(request, username=username, password=password)
-            if user:
-                signin(request, user)
+
+        if not username or not password:
+            messages.error(request, "Username and password are required")
+            return render(request, 'accounts/login.html')
+
+        user = authenticate(request, username=username, password=password)
+        if user:
+            signin(request, user)  # Log in the user
+
+            # Redirect based on superuser or normal user
+            if user.is_superuser:
                 return redirect('administration:dashboard')
             else:
-                message = "Invalid username or password"
+                return redirect('management:dashboard')
         else:
-            message = "Username and password is required"
+            messages.error(request, "Invalid username or password")
 
-    context = {
-        "message": message
-    }
-    return render(request, 'accounts/login.html', context)
+    return render(request, 'accounts/login.html')

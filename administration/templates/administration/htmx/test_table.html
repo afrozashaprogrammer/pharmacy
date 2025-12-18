@@ -1,0 +1,75 @@
+<!-- TEST TABLE CONTAINER -->
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
+
+  <!-- Header + Search Box () -->
+  <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+    <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100">Test List</h2>
+
+    <!-- Search -->
+    <form method="GET" class="flex items-center gap-2">
+      <input 
+        type="text"
+        name="search"
+        value="{{ request.GET.search }}"
+        hx-get="?type=search&search={{ request.GET.search }}"
+        hx-trigger="input delay:300ms"
+        hx-target="#testResultsContainer"
+        placeholder="Search test name or code"
+        class="px-3 py-2 text-sm border border-slate-300 dark:border-slate-700 rounded-lg
+               bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/60"
+      >
+    </form>
+  </div>
+
+  <!-- Table + Pagination (HTMX target) -->
+  <div id="testResultsContainer" class="overflow-x-auto">
+    {% include 'administration/htmx/test_search_result.html' %}
+  </div>
+
+</div>
+
+<!-- PAGINATION -->
+{% if tests.has_other_pages %}
+<div class="flex justify-between items-center mt-4 px-4">
+  <div class="text-sm text-slate-600 dark:text-slate-400">
+    Showing {{ tests.start_index }} to {{ tests.end_index }} of {{ tests.paginator.count }} Tests
+  </div>
+
+  <div class="flex space-x-1">
+    {% if tests.has_previous %}
+      <a 
+        hx-get="?type=pagination&page={{ tests.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+        hx-target="#testTableParentContainer"
+        class="px-3 py-1 rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 hover:bg-primary hover:text-white">
+        Previous
+      </a>
+    {% else %}
+      <span class="px-3 py-1 rounded-lg border bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed">Previous</span>
+    {% endif %}
+
+    {% for num in tests.paginator.page_range %}
+      {% if tests.number == num %}
+        <span class="px-3 py-1 rounded-lg border bg-primary text-white">{{ num }}</span>
+      {% elif num > tests.number|add:'-3' and num < tests.number|add:'3' %}
+        <a
+          hx-get="?type=pagination&page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+          hx-target="#testTableParentContainer"
+          class="px-3 py-1 rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 hover:bg-primary hover:text-white">
+          {{ num }}
+        </a>
+      {% endif %}
+    {% endfor %}
+
+    {% if tests.has_next %}
+      <a 
+        hx-get="?type=pagination&page={{ tests.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+        hx-target="#testTableParentContainer"
+        class="px-3 py-1 rounded-lg border bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 hover:bg-primary hover:text-white">
+        Next
+      </a>
+    {% else %}
+      <span class="px-3 py-1 rounded-lg border bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed">Next</span>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
