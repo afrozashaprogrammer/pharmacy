@@ -69,6 +69,40 @@
        - hamburger visible on small screens to open sidebar
        ============================ -->
   {% include 'administration/header.html' %}
+  {% if messages %}
+  <div id="django-messages" class="px-4 mt-3 space-y-2">
+    {% for message in messages %}
+      <div
+        class="
+          django-message
+          flex items-center justify-between
+          px-3 py-2 rounded-md border text-xs
+          transition-all duration-500 ease-in-out
+          {% if message.tags == 'success' %}
+            bg-green-50 text-green-700 border-green-200
+          {% elif message.tags == 'error' %}
+            bg-red-50 text-red-700 border-red-200
+          {% elif message.tags == 'warning' %}
+            bg-yellow-50 text-yellow-700 border-yellow-200
+          {% else %}
+            bg-slate-100 text-slate-700 border-slate-200
+          {% endif %}
+        "
+      >
+        <span class="leading-snug">{{ message }}</span>
+
+        <button
+          onclick="this.parentElement.remove()"
+          class="ml-3 text-sm opacity-50 hover:opacity-100"
+        >
+          ×
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+
 
   {% block content %}
   {% endblock %}
@@ -199,6 +233,21 @@
       profileDropdown?.classList.add('hidden');
     }
   });
+  // Message 
+  document.addEventListener("DOMContentLoaded", function () {
+  const messages = document.querySelectorAll(".django-message");
+  if (!messages.length) return;
+
+  setTimeout(() => {
+    messages.forEach(msg => {
+      msg.classList.add("opacity-0", "translate-y-1");
+
+      setTimeout(() => {
+        msg.remove();
+      }, 500);
+    });
+  }, 4000); // 4 seconds
+  });
 
   /* --------------------------
      Collapsible menus inside sidebar
@@ -234,6 +283,9 @@
   });
 
 })();
+
+
 </script>
+
 </body>
 </html>
