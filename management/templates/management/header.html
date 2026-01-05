@@ -11,7 +11,7 @@
 
           <div>
             <h1 id="pageTitle" class="text-lg font-semibold text-slate-900 dark:text-slate-100">Dashboard</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-300">Welcome back, {{ request.user.username }}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-300">Welcome back, Admin</p>
           </div>
         </div>
 
@@ -63,30 +63,14 @@
 
           <!-- Profile dropdown -->
           <div class="relative">
-            <button id="profileBtn"
-                    class="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
-                    aria-expanded="false"
-                    aria-controls="profileDropdown">
-
-              {% if request.user.profile.image %}
-                <img src="{{ request.user.profile.image.url }}"
-                    alt="Profile"
-                    class="w-8 h-8 rounded-full object-cover border" />
-              {% else %}
-                <img src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=7c3aed&color=fff&size=32"
-                    alt="Avatar"
-                    class="w-8 h-8 rounded-full" />
-              {% endif %}
-
-              <span class="hidden sm:inline text-sm">
-                {{ request.user.username }}
-              </span>
+            <button id="profileBtn" class="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700" aria-expanded="false" aria-controls="profileDropdown">
+              <img src="https://ui-avatars.com/api/?name=Admin&background=7c3aed&color=fff&size=32" alt="Admin" class="w-8 h-8 rounded-full" />
+              <span class="hidden sm:inline text-sm">Admin</span>
             </button>
-
 
             <!-- profile dropdown -->
             <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-black/5">
-              <a href="{% url 'administration:profile' %}" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700">
+              <a href="#" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.28 0 4-1.72 4-4s-1.72-4-4-4-4 1.72-4 4 1.72 4 4 4zM6 20v-1a4 4 0 014-4h4a4 4 0 014 4v1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Profile
               </a>
@@ -94,15 +78,8 @@
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Activity
               </a>
-              <!-- Logout -->
-              <a href="{% url 'accounts:logout' %}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-slate-700">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"
-                        stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Logout
-              </a>
+              <div class="border-t border-slate-100 dark:border-slate-700"></div>
+              <button id="logoutBtn" class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm">Logout</button>
             </div>
           </div>
 

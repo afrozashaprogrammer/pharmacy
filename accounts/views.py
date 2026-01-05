@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as signin
+from django.contrib.auth import logout as django_logout
 from django.contrib import messages
 # Create your views here.
 def home(request):
@@ -26,3 +27,9 @@ def login(request):
             messages.error(request, "Invalid username or password")
 
     return render(request, 'accounts/login.html')
+
+def logout(request):
+    """Log the user out and redirect to login page."""
+    django_logout(request)
+    messages.success(request, "You have successfully logged out.")
+    return redirect('accounts:login')  # replace with your login URL name

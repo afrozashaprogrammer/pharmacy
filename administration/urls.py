@@ -10,5 +10,7 @@ urlpatterns = [
     path("tests/", tests, name="tests"),
     path("tests-create/", create_test, name="create_test"),
     path("tests-update/<int:test_id>/",update_test, name="update_test"),
+    path("profile/", profile, name="profile"),
+    path('profile/edit/', edit_profile, name='edit_profile'),
     
 ]

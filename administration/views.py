@@ -225,3 +225,49 @@ def update_test(request, test_id):
         test.save()
         messages.success(request, "Test updated successfully.")
         return redirect("administration:tests")
+    
+@login_required(login_url="/accounts/login/")
+def profile(request):
+    """View own profile"""
+    user = request.user
+    profile = user.profile
+    context = {
+        'user': user,
+        'profile': profile,
+    }
+    return render(request, 'administration/profile.html', context)
+
+
+@login_required(login_url="/accounts/login/")
+def edit_profile(request):
+    """Update own profile"""
+    user = request.user
+    profile = user.profile
+
+    if request.method == "POST":
+        # User fields
+        user.first_name = request.POST.get("first_name", user.first_name)
+        user.last_name = request.POST.get("last_name", user.last_name)
+        user.username = request.POST.get("username", user.username)
+
+        # Profile fields
+        profile.phone_number = request.POST.get("phone_number", profile.phone_number)
+        profile.address = request.POST.get("address", profile.address)
+        profile.gender = request.POST.get("gender", profile.gender)
+
+        # Profile image upload
+        if request.FILES.get("image"):
+            profile.image = request.FILES.get("image")
+
+        # Save changes
+        user.save()
+        profile.save()
+
+        messages.success(request, "Profile updated successfully!")
+        return redirect('administration:profile')
+
+    context = {
+        'user': user,
+        'profile': profile,
+    }
+    return render(request, 'administration/edit_profile.html', context)

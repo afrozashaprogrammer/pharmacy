@@ -12,6 +12,7 @@ class Profile(models.Model):
     image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
     gender = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    last_seen = models.DateTimeField(blank=True, null=True)
     
     def __str__(self):
         return f"{self.user.username} - {self.role}"
@@ -20,8 +21,9 @@ class Profile(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
-        
+
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
+        

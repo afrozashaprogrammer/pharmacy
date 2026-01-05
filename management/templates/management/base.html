@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en" class="h-full" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Diagnostic Centre — Management</title>
+
+  <!-- Tailwind CDN (v4 compatible) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#7c3aed', /* purple/indigo primary */
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root { --primary: #7c3aed; }
+
+    /* Sidebar always dark regardless of theme */
+    .sidebar {
+      background: linear-gradient(180deg,#061026 0%,#071428 100%);
+      color: #fff;
+    }
+
+    /* Custom scrollbar for sidebar only */
+    .sidebar::-webkit-scrollbar { width: 10px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 9999px; }
+
+    /* Smooth transitions for some UI */
+    .animate-fast { transition: all .18s ease; }
+
+    /* keep header slightly translucent for nicer look */
+    .header-shadow { box-shadow: 0 1px 0 rgba(0,0,0,0.06); }
+
+    /* small screen overlay body lock */
+    .offcanvas-open { overflow: hidden; }
+  </style>
+</head>
+<body class="h-full antialiased text-slate-900 bg-slate-50 dark:text-slate-100 dark:bg-slate-900">
+
+<!-- ============================
+     SIDEBAR (ALWAYS DARK)
+     - Fixed on left
+     - Independent scrollbar
+     - Contains brand + menu sections + collapsible menus
+     ============================ -->
+  {% include 'management/siderbar.html' %}
+<!-- ============================
+     MAIN WRAPPER
+     - main content is padded on the left for md+ to make room for sidebar
+     ============================ -->
+<div id="main" class="min-h-screen md:pl-64">
+
+  <!-- ============================
+       HEADER
+       - left: page title
+       - right: search, notification dropdown, theme toggle, profile dropdown
+       - hamburger visible on small screens to open sidebar
+       ============================ -->
+  {% include 'management/header.html' %}
+
+  {% block content %}
+  {% endblock %}
+
+
+  {% include 'management/footer.html' %}
+
+</div>
+
+<!-- ============================
+     SCRIPTS
+     - theme toggle with persistence
+     - sidebar open/close (mobile)
+     - collapsible menus
+     - dropdown toggles (notif, profile)
+     - accessible escape/close behaviour
+     ============================ -->
+<script>
+(function () {
+  const html = document.documentElement;
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const openSidebarBtn = document.getElementById('openSidebarBtn');
+  const notifBtn = document.getElementById('notifBtn');
+  const notifDropdown = document.getElementById('notifDropdown');
+  const profileBtn = document.getElementById('profileBtn');
+  const profileDropdown = document.getElementById('profileDropdown');
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  const THEME_KEY = 'dc-theme'; // localStorage key
+
+  /* --------------------------
+     Theme handling (save/load)
+     -------------------------- */
+  function setLightIcon() {
+    themeIcon.innerHTML = '<path d="M12 3v2M12 19v2M5.22 5.22l1.42 1.42M17.36 17.36l1.42 1.42M3 12h2M19 12h2M5.22 18.78l1.42-1.42M17.36 6.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>';
+    themeToggle.setAttribute('aria-pressed', 'false');
+  }
+  function setDarkIcon() {
+    themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>';
+    themeToggle.setAttribute('aria-pressed', 'true');
+  }
+
+  function applyTheme(theme) {
+    if (theme === 'dark') {
+      html.classList.add('dark');
+      setDarkIcon();
+    } else {
+      html.classList.remove('dark');
+      setLightIcon();
+    }
+  }
+
+  // load saved theme or system preference
+  const savedTheme = localStorage.getItem(THEME_KEY);
+  if (savedTheme) {
+    applyTheme(savedTheme);
+  } else {
+    const preferDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(preferDark ? 'dark' : 'light');
+  }
+
+  // toggle
+  themeToggle?.addEventListener('click', () => {
+    const next = html.classList.contains('dark') ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem(THEME_KEY, next);
+  });
+
+  /* --------------------------
+     Sidebar open/close (mobile)
+     -------------------------- */
+  function openSidebar() {
+    sidebar.classList.remove('-translate-x-full');
+    sidebar.classList.add('translate-x-0');
+    overlay.classList.remove('hidden');
+    document.body.classList.add('offcanvas-open');
+  }
+  function closeSidebar() {
+    // slide out on small screens
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+    document.body.classList.remove('offcanvas-open');
+  }
+
+  // ensure responsive initial state
+  function responsiveInit() {
+    if (window.innerWidth < 768) {
+      sidebar.classList.add('-translate-x-full');
+    } else {
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.add('hidden');
+    }
+  }
+  responsiveInit();
+  window.addEventListener('resize', responsiveInit);
+
+  openSidebarBtn?.addEventListener('click', openSidebar);
+  overlay?.addEventListener('click', closeSidebar);
+
+  /* --------------------------
+     Dropdown toggles
+     -------------------------- */
+  notifBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notifDropdown.classList.toggle('hidden');
+    profileDropdown.classList.add('hidden');
+  });
+
+  profileBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    profileDropdown.classList.toggle('hidden');
+    notifDropdown.classList.add('hidden');
+  });
+
+  // close dropdowns when clicking outside
+  document.addEventListener('click', () => {
+    notifDropdown?.classList.add('hidden');
+    profileDropdown?.classList.add('hidden');
+  });
+
+  // ESC closes everything
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeSidebar();
+      notifDropdown?.classList.add('hidden');
+      profileDropdown?.classList.add('hidden');
+    }
+  });
+
+  /* --------------------------
+     Collapsible menus inside sidebar
+     - markup: any <li data-collapsible> with
+       .collapsible-toggle and .collapsible-panel
+     -------------------------- */
+  document.querySelectorAll('[data-collapsible]').forEach((item) => {
+    const btn = item.querySelector('.collapsible-toggle');
+    const panel = item.querySelector('.collapsible-panel');
+    if (!btn || !panel) return;
+    btn.addEventListener('click', () => {
+      const opened = !panel.classList.contains('hidden');
+      if (opened) {
+        panel.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+        const arrow = btn.querySelector('svg:last-child');
+        arrow?.classList.remove('rotate-180');
+      } else {
+        panel.classList.remove('hidden');
+        btn.setAttribute('aria-expanded', 'true');
+        const arrow = btn.querySelector('svg:last-child');
+        arrow?.classList.add('rotate-180');
+      }
+    });
+  });
+
+  /* --------------------------
+     Logout demo
+     -------------------------- */
+  logoutBtn?.addEventListener('click', () => {
+    // Replace with real logout flow
+    alert('Logging out... (demo)');
+  });
+
+})();
+</script>
+</body>
+</html>

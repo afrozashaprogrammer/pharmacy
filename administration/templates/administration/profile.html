@@ -1,0 +1,54 @@
+{% extends "administration/base.html" %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto mt-12 p-8 bg-white dark:bg-slate-800 rounded-2xl shadow-lg">
+  <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-slate-100">My Profile</h2>
+
+  <!-- Django messages -->
+  {% if messages %}
+    <div class="space-y-2 mb-4">
+      {% for message in messages %}
+        <div class="px-4 py-2 rounded-md text-sm
+            {% if message.tags == 'success' %} bg-green-50 text-green-700 border border-green-200
+            {% elif message.tags == 'error' %} bg-red-50 text-red-700 border border-red-200
+            {% else %} bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-600
+            {% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="flex items-center gap-6 mb-6">
+    <!-- Profile Image -->
+    {% if profile.image %}
+      <img src="{{ profile.image.url }}" alt="Profile Image" class="w-32 h-32 rounded-full object-cover border dark:border-slate-600"/>
+    {% else %}
+      <div class="w-32 h-32 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 border dark:border-slate-600">No Image</div>
+    {% endif %}
+
+    <!-- User Info -->
+    <div>
+      <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ user.get_full_name }}</h3>
+      <p class="text-sm text-slate-600 dark:text-slate-400">Username: {{ user.username }}</p>
+      <p class="text-sm text-slate-600 dark:text-slate-400">Phone: {{ profile.phone_number|default:"-" }}</p>
+      <p class="text-sm text-slate-600 dark:text-slate-400">Address: {{ profile.address|default:"-" }}</p>
+      <p class="text-sm text-slate-600 dark:text-slate-400">Gender: {{ profile.gender|default:"-" }}</p>
+      <!-- Last seen -->
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+            Last seen: 
+            {% if profile.last_seen %}
+            {{ profile.last_seen|date:"d M Y H:i" }}
+            {% else %}
+            Never
+            {% endif %}
+        </p>
+    </div>
+  </div>
+
+  <a href="{% url 'administration:edit_profile' %}" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-purple-600 transition-all">
+    Edit Profile
+  </a>
+</div>
+
+{% endblock %}
