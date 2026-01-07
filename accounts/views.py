@@ -3,9 +3,14 @@ from django.contrib.auth import authenticate, login as signin
 from django.contrib.auth import logout as django_logout
 from django.contrib import messages
 # Create your views here.
-def home(request):
-    return render(request, 'accounts/home.html')
+
 def login(request):
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return redirect('administration:dashboard')
+        else:
+            return redirect('management:dashboard')
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -16,9 +21,8 @@ def login(request):
 
         user = authenticate(request, username=username, password=password)
         if user:
-            signin(request, user)  # Log in the user
+            signin(request, user)
 
-            # Redirect based on superuser or normal user
             if user.is_superuser:
                 return redirect('administration:dashboard')
             else:

@@ -1,0 +1,72 @@
+# ================================
+# Python / Django common ignores
+# ================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Environment variables
+.env
+
+# Database files
+*.sqlite3
+*.db
+
+# Django migrations (optional: uncomment if you don't want to track migrations)
+# **/migrations/
+# !**/migrations/__init__.py
+
+# Media and static files
+media/
+staticfiles/
+static/
+
+# Logs
+*.log
+
+# Coverage / Testing
+.coverage
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Python packaging
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+*.manifest
+*.spec
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.DS_Store
+Thumbs.db
+
+# Backup / temporary files
+*.bak
+*.tmp
+
+# ================================
+# PostgreSQL (optional, if local dump exists)
+# ================================
+*.sql
+*.dump
