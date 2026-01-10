@@ -1,0 +1,177 @@
+{% extends "management/base.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto mt-10 p-8 bg-white dark:bg-slate-800 rounded-2xl shadow-lg">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100">
+        Patient Test Entry
+      </h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        রোগীর পরীক্ষার বিল তৈরি করুন
+      </p>
+    </div>
+    <span class="px-3 py-1 text-xs rounded-full bg-primary/10 text-primary">
+      Counter Panel
+    </span>
+  </div>
+
+  <div class="space-y-6">
+
+    <!-- Patient Info -->
+    <div class="p-5 border rounded-xl dark:border-slate-700">
+      <h3 class="font-semibold mb-4">Patient Information</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-medium mb-1">Patient (রোগী)</label>
+          <select class="w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-900">
+            {% for patient in patients %}
+            <option value="{{ patient.id }}">{{ patient.get_full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium mb-1">Referred By (রেফার করেছেন)</label>
+          <select class="w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-900">
+            {% for doctor in staff %}
+            <option value="{{ doctor.id }}">{{ doctor.get_full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Medical Test Selection -->
+    <div class="p-5 border rounded-xl dark:border-slate-700">
+      <h3 class="font-semibold mb-4">Medical Tests</h3>
+
+      <div class="flex flex-col md:flex-row gap-3">
+        <select id="medical_test_select"
+                class="flex-1 rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-900">
+          <option value="">Select Test</option>
+          {% for test in medical_tests %}
+          <option value="{{ test.id }}" data-price="{{ test.price }}">
+            {{ test.name }} – {{ test.sample_type }} – {{ test.price }}৳
+          </option>
+          {% endfor %}
+        </select>
+
+        <button type="button" id="add_test_btn" class="btn btn-primary">
+          ➕ Add Test
+        </button>
+      </div>
+    </div>
+
+    <!-- Selected Tests -->
+    <div class="border rounded-xl dark:border-slate-700 overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-100 dark:bg-slate-700">
+          <tr>
+            <th class="px-4 py-2 text-left">#</th>
+            <th class="px-4 py-2 text-left">Test</th>
+            <th class="px-4 py-2 text-left">Sample</th>
+            <th class="px-4 py-2 text-right">Price</th>
+            <th class="px-4 py-2 text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody id="selected_tests">
+          <tr id="emptyRow">
+            <td colspan="5" class="text-center text-slate-400 py-6">
+              No tests added yet
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Billing Summary -->
+    <div class="bg-primary/5 border border-primary/20 rounded-xl p-5">
+      <h3 class="font-semibold text-primary mb-3">Billing Summary</h3>
+
+      <div class="flex justify-between text-sm mb-1">
+        <span>Total Tests</span>
+        <span id="total_tests">0</span>
+      </div>
+
+      <div class="flex justify-between text-sm mb-1">
+        <span>Total Amount</span>
+        <span><span id="total_amount">0</span>৳</span>
+      </div>
+
+      <div class="flex justify-between font-semibold text-lg mt-3">
+        <span>Payable Amount</span>
+        <span><span id="payable_amount">0</span>৳</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end gap-3">
+      <button class="btn btn-secondary">Save Draft</button>
+      <button class="btn btn-primary px-6">Confirm Bill</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const medicalSelect = document.getElementById('medical_test_select');
+const addBtn = document.getElementById('add_test_btn');
+const tbody = document.getElementById('selected_tests');
+const emptyRow = document.getElementById('emptyRow');
+
+let counter = 1;
+let totalAmount = 0;
+
+addBtn.addEventListener('click', () => {
+  const selected = medicalSelect.options[medicalSelect.selectedIndex];
+  if (!selected.value) return alert('Select a test first');
+
+  if (emptyRow) emptyRow.remove();
+
+  const price = parseFloat(selected.dataset.price);
+
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td class="px-4 py-2">${counter}</td>
+    <td class="px-4 py-2">${selected.text}</td>
+    <td class="px-4 py-2">-</td>
+    <td class="px-4 py-2 text-right">${price}৳</td>
+    <td class="px-4 py-2 text-center">
+      <button class="text-red-500 hover:text-red-700 remove-btn">✕</button>
+    </td>
+  `;
+
+  tbody.appendChild(row);
+
+  counter++;
+  totalAmount += price;
+
+  document.getElementById('total_tests').innerText = counter - 1;
+  document.getElementById('total_amount').innerText = totalAmount.toFixed(2);
+  document.getElementById('payable_amount').innerText = totalAmount.toFixed(2);
+
+  row.querySelector('.remove-btn').addEventListener('click', () => {
+    totalAmount -= price;
+    row.remove();
+    counter--;
+
+    document.getElementById('total_tests').innerText = counter - 1;
+    document.getElementById('total_amount').innerText = totalAmount.toFixed(2);
+    document.getElementById('payable_amount').innerText = totalAmount.toFixed(2);
+
+    if (counter === 1) {
+      tbody.innerHTML = `
+        <tr id="emptyRow">
+          <td colspan="5" class="text-center text-slate-400 py-6">
+            No tests added yet
+          </td>
+        </tr>`;
+    }
+  });
+});
+</script>
+{% endblock %}

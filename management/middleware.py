@@ -3,10 +3,9 @@ from django.urls import reverse
 
 class CounterRedirectMiddleware:
     """
-    Enforce role-based access for counter users.
-
-    - Counter users are always redirected to /management/counter/
-    - Counter users cannot access /management/ dashboard
+    Counter users:
+    - Cannot access main management dashboard
+    - Can access /management/counter/* URLs freely
     """
 
     def __init__(self, get_response):
@@ -15,20 +14,19 @@ class CounterRedirectMiddleware:
     def __call__(self, request):
         user = request.user
 
-        # Only for authenticated users
         if user.is_authenticated:
             profile = getattr(user, "profile", None)
 
             if profile and profile.role == "counter":
-                counter_url = reverse("management:counter_dashboard")
                 dashboard_url = reverse("management:dashboard")
+                counter_prefix = "/management/counter/"
 
-                # ❌ Prevent counter from accessing main dashboard
+                # ❌ Block main dashboard only
                 if request.path == dashboard_url:
-                    return redirect(counter_url)
+                    return redirect(reverse("management:counter_dashboard"))
 
-                # ✅ Optional: force counter to stay inside counter area
-                if request.path.startswith("/management/") and request.path != counter_url:
-                    return redirect(counter_url)
+                # ✅ Allow all counter URLs
+                if request.path.startswith(counter_prefix):
+                    return self.get_response(request)
 
         return self.get_response(request)
