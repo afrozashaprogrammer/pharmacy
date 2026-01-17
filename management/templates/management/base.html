@@ -7,6 +7,8 @@
 
   <!-- Tailwind CDN (v4 compatible) -->
   <script src="https://cdn.tailwindcss.com"></script>
+   <!-- ✅ HTMX -->
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
   <!-- Tailwind config -->
   <script>
@@ -88,29 +90,36 @@
 <script>
 (function () {
   const html = document.documentElement;
+
+  /* ========= ELEMENTS ========= */
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('overlay');
   const openSidebarBtn = document.getElementById('openSidebarBtn');
+
   const notifBtn = document.getElementById('notifBtn');
   const notifDropdown = document.getElementById('notifDropdown');
+
   const profileBtn = document.getElementById('profileBtn');
   const profileDropdown = document.getElementById('profileDropdown');
+
   const themeToggle = document.getElementById('themeToggle');
   const themeIcon = document.getElementById('themeIcon');
+
   const logoutBtn = document.getElementById('logoutBtn');
 
-  const THEME_KEY = 'dc-theme'; // localStorage key
+  const THEME_KEY = 'dc-theme';
 
-  /* --------------------------
-     Theme handling (save/load)
-     -------------------------- */
+  /* ========= THEME ========= */
   function setLightIcon() {
-    themeIcon.innerHTML = '<path d="M12 3v2M12 19v2M5.22 5.22l1.42 1.42M17.36 17.36l1.42 1.42M3 12h2M19 12h2M5.22 18.78l1.42-1.42M17.36 6.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>';
-    themeToggle.setAttribute('aria-pressed', 'false');
+    if (!themeIcon) return;
+    themeIcon.innerHTML =
+      '<path d="M12 3v2M12 19v2M5.22 5.22l1.42 1.42M17.36 17.36l1.42 1.42M3 12h2M19 12h2M5.22 18.78l1.42-1.42M17.36 6.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>';
   }
+
   function setDarkIcon() {
-    themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>';
-    themeToggle.setAttribute('aria-pressed', 'true');
+    if (!themeIcon) return;
+    themeIcon.innerHTML =
+      '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>';
   }
 
   function applyTheme(theme) {
@@ -121,77 +130,71 @@
       html.classList.remove('dark');
       setLightIcon();
     }
+    localStorage.setItem(THEME_KEY, theme);
   }
 
-  // load saved theme or system preference
   const savedTheme = localStorage.getItem(THEME_KEY);
   if (savedTheme) {
     applyTheme(savedTheme);
   } else {
-    const preferDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    applyTheme(preferDark ? 'dark' : 'light');
+    applyTheme(
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+    );
   }
 
-  // toggle
   themeToggle?.addEventListener('click', () => {
-    const next = html.classList.contains('dark') ? 'light' : 'dark';
-    applyTheme(next);
-    localStorage.setItem(THEME_KEY, next);
+    applyTheme(html.classList.contains('dark') ? 'light' : 'dark');
   });
 
-  /* --------------------------
-     Sidebar open/close (mobile)
-     -------------------------- */
+  /* ========= SIDEBAR (MOBILE) ========= */
   function openSidebar() {
-    sidebar.classList.remove('-translate-x-full');
-    sidebar.classList.add('translate-x-0');
-    overlay.classList.remove('hidden');
+    sidebar?.classList.remove('-translate-x-full');
+    overlay?.classList.remove('hidden');
     document.body.classList.add('offcanvas-open');
   }
+
   function closeSidebar() {
-    // slide out on small screens
-    sidebar.classList.add('-translate-x-full');
-    overlay.classList.add('hidden');
+    sidebar?.classList.add('-translate-x-full');
+    overlay?.classList.add('hidden');
     document.body.classList.remove('offcanvas-open');
   }
 
-  // ensure responsive initial state
-  function responsiveInit() {
+  function responsiveSidebar() {
     if (window.innerWidth < 768) {
-      sidebar.classList.add('-translate-x-full');
+      sidebar?.classList.add('-translate-x-full');
     } else {
-      sidebar.classList.remove('-translate-x-full');
-      overlay.classList.add('hidden');
+      sidebar?.classList.remove('-translate-x-full');
+      overlay?.classList.add('hidden');
     }
   }
-  responsiveInit();
-  window.addEventListener('resize', responsiveInit);
+
+  responsiveSidebar();
+  window.addEventListener('resize', responsiveSidebar);
 
   openSidebarBtn?.addEventListener('click', openSidebar);
   overlay?.addEventListener('click', closeSidebar);
 
-  /* --------------------------
-     Dropdown toggles
-     -------------------------- */
+  /* ========= DROPDOWNS ========= */
   notifBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
-    notifDropdown.classList.toggle('hidden');
-    profileDropdown.classList.add('hidden');
+    notifDropdown?.classList.toggle('hidden');
+    profileDropdown?.classList.add('hidden');
   });
 
   profileBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
-    profileDropdown.classList.toggle('hidden');
-    notifDropdown.classList.add('hidden');
+    profileDropdown?.classList.toggle('hidden');
+    notifDropdown?.classList.add('hidden');
   });
 
-  // close dropdowns when clicking outside
   document.addEventListener('click', () => {
     notifDropdown?.classList.add('hidden');
     profileDropdown?.classList.add('hidden');
   });
 
-  // ESC closes everything
+  /* ========= ESC KEY ========= */
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeSidebar();
@@ -200,36 +203,27 @@
     }
   });
 
-  /* --------------------------
-     Collapsible menus inside sidebar
-     - markup: any <li data-collapsible> with
-       .collapsible-toggle and .collapsible-panel
-     -------------------------- */
-  document.querySelectorAll('[data-collapsible]').forEach((item) => {
-    const btn = item.querySelector('.collapsible-toggle');
-    const panel = item.querySelector('.collapsible-panel');
-    if (!btn || !panel) return;
-    btn.addEventListener('click', () => {
-      const opened = !panel.classList.contains('hidden');
-      if (opened) {
-        panel.classList.add('hidden');
-        btn.setAttribute('aria-expanded', 'false');
-        const arrow = btn.querySelector('svg:last-child');
-        arrow?.classList.remove('rotate-180');
-      } else {
-        panel.classList.remove('hidden');
-        btn.setAttribute('aria-expanded', 'true');
-        const arrow = btn.querySelector('svg:last-child');
-        arrow?.classList.add('rotate-180');
-      }
-    });
-  });
+  /* ========= COLLAPSIBLE MENUS (FIXED) ========= */
+document.querySelectorAll('[data-collapsible]').forEach((item) => {
+  const btn = item.querySelector('.collapsible-toggle');
+  const panel = item.querySelector('.collapsible-panel');
+  const arrow = item.querySelector('.arrow'); // ✅ FIX HERE
 
-  /* --------------------------
-     Logout demo
-     -------------------------- */
+  if (!btn || !panel) return;
+
+  btn.addEventListener('click', () => {
+    const isOpen = !panel.classList.contains('hidden');
+
+    panel.classList.toggle('hidden');
+    btn.setAttribute('aria-expanded', String(!isOpen));
+
+    // rotate only this arrow
+    arrow?.classList.toggle('rotate-180');
+  });
+});
+
+  /* ========= LOGOUT DEMO ========= */
   logoutBtn?.addEventListener('click', () => {
-    // Replace with real logout flow
     alert('Logging out... (demo)');
   });
 

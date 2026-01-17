@@ -26,14 +26,34 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-medium mb-1">Patient (রোগী)</label>
-          <select class="w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-900">
-            {% for patient in patients %}
-            <option value="{{ patient.id }}">{{ patient.get_full_name }}</option>
-            {% endfor %}
-          </select>
+          <label class="block text-xs font-medium mb-1">
+            Patient (রোগী)
+          </label>
+
+          <!-- Search Input -->
+          <input
+            type="text"
+            name="patient_search"
+            placeholder="Type patient name..."
+            class="w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-900"
+            hx-get="{% url 'management:patient_search' %}"
+            hx-trigger="keyup changed delay:300ms"
+            hx-target="#patient-results"
+            hx-indicator=".htmx-indicator"
+          >
+
+          <!-- Search Results & Add New -->
+          <div id="patient-results"
+              class="border rounded-lg mt-1 bg-white dark:bg-slate-900 max-h-52 overflow-y-auto">
+            <!-- HTMX এখানে সার্চ রেজাল্ট বা Add New Form লোড করবে -->
+          </div>
+
+          <input type="hidden" name="patient_id" id="patient_id">
         </div>
 
+
+
+        <!-- Doctor Info -->
         <div>
           <label class="block text-xs font-medium mb-1">Referred By (রেফার করেছেন)</label>
           <select class="w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-900">
@@ -173,5 +193,62 @@ addBtn.addEventListener('click', () => {
     }
   });
 });
+
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('px-3') || e.target.classList.contains('patient-result')) {
+    const patientDiv = e.target.closest('div[data-id]');
+    if (!patientDiv) return;
+    const patientId = patientDiv.dataset.id;
+    const patientName = patientDiv.innerText;
+
+    // hidden input set
+    document.getElementById('patient_id').value = patientId;
+
+    // input field এ নাম দেখানো
+    document.querySelector('input[name="patient_search"]').value = patientName;
+
+    // results hide
+    document.getElementById('patient-results').innerHTML = '';
+  }
+});
+
+
+// ============================
+// Patient select logic
+// ============================
+function selectPatient(patientDiv) {
+    const patientId = patientDiv.dataset.id;
+    const patientName = patientDiv.querySelector('p').innerText;
+
+    // Hidden input update
+    document.getElementById('patient_id').value = patientId;
+    // Search input update
+    document.querySelector('input[name="patient_search"]').value = patientName;
+
+    // Hide results
+    document.getElementById('patient-results').innerHTML = '';
+}
+
+// Click on patient from search results
+document.addEventListener('click', function(e) {
+    const patientDiv = e.target.closest('.patient-result');
+    if (patientDiv) selectPatient(patientDiv);
+});
+
+// HTMX event: after new patient is created & inserted into DOM
+document.body.addEventListener('htmx:afterSwap', (event) => {
+    if (event.detail.target.id === 'patient-results') {
+        const patientDiv = event.detail.target.querySelector('.patient-result');
+        if (patientDiv) selectPatient(patientDiv);
+    }
+});
+
+document.body.addEventListener('htmx:afterSwap', (event) => {
+    if (event.detail.target.id === 'patient-results') {
+        const patientDiv = event.detail.target.querySelector('.patient-result');
+        if (patientDiv) selectPatient(patientDiv);
+    }
+});
+
 </script>
 {% endblock %}

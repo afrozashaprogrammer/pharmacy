@@ -1,0 +1,6 @@
+<div class="px-3 py-2 patient-result bg-primary/5 rounded-lg" data-id="{{ patient.id }}">
+  <p class="font-medium">{{ patient.get_full_name }}</p>
+  <p class="text-xs text-slate-500">{{ patient.email }}</p>
+
+  <input type="hidden" name="patient_id" value="{{ patient.id }}">
+</div>

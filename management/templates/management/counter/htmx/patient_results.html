@@ -1,0 +1,23 @@
+{% if patients %}
+  {% for patient in patients %}
+    <div
+      class="px-3 py-2 cursor-pointer hover:bg-primary/10"
+      hx-get="{% url 'management:patient_select' patient.id %}"
+      hx-target="#patient-results"
+      hx-swap="innerHTML"
+    >
+      {{ patient.get_full_name }} — {{ patient.username }}
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="px-3 py-2 text-sm text-slate-500">
+    No patient found.
+    <button
+      class="text-primary underline ml-1"
+      hx-get="{% url 'management:patient_create_form' %}"
+      hx-target="#patient-results"
+      hx-swap="innerHTML">
+      ➕ Add new patient
+    </button>
+  </div>
+{% endif %}
